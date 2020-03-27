@@ -11,3 +11,23 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.row-m-t{
+  margin-top : 20px;
+  margin-bottom: 20px;
+  font-size: large;
+}
+
+.disable-dbl-tap-zoom {
+  touch-action: manipulation;
+}
+
+.text{
+  font-size: large;
+}
+
+.outer {
+  display : flex;
+  align-items : center;
+  justify-content: center;
+}
