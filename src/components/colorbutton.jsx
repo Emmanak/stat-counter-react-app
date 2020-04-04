@@ -2,14 +2,22 @@ import React, { Component } from 'react';
 
 class ColorButton extends Component {
     state = { 
-        c_id: this.props.id,
-        c_class: this.props.className,
-        name: this.props.name,
-        type: this.props.type 
+        colorbuttons: this.props.colorbuttons
     }
     render() { 
-        return ( 
-        <button id={this.state.c_id} type={this.state.type} className={this.state.c_class} onClick={()=> this.props.selectColor(this.props.id)}>{this.state.name}</button>
+        return (
+            <div className="container">
+                    <div className="row">
+                        <span className="text mx-auto">Select Color:</span>
+                    </div>
+                    <div className="row row-m-t">
+                            <div className="btn-group mx-auto mr-2 outer" role="group" aria-label="Basic example">
+                                {this.state.colorbuttons.map(button => (<button key={button.c_id} id={button.class_id} type="button" 
+                                onClick={ () => this.props.selectColor(button.class_id)} name={button.color} className={'btn btn-'.concat(button.class_id)}>{button.color}</button>))}
+                        </div>
+                    </div>
+                </div>
+        
              );
     }
 }

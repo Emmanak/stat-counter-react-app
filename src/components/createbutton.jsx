@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import PushButton from './pushbutton';
 import ColorButton from './colorbutton';
+import {db} from '../fbConfig.js';
+import {increment, decrement} from '../fbConfig.js';
 
 
 class CreateButton extends Component {
+    
     state = { buttons: [],
         counter: 0,
         colorbuttons: [
@@ -16,23 +19,20 @@ class CreateButton extends Component {
         ],
         currentColor: "primary"
     };
+
     render() {
-        let {buttons } = this.state;
+
+        
+        let {buttons} = this.state;
+        console.log(buttons);
         if(buttons === undefined || buttons.length === 0){
             return ( 
             <div>
-
-                <div className="container">
-                    <div className="row">
-                        <span className="text mx-auto">Select Color:</span>
-                    </div>
-                    <div className="row row-m-t">
-                        <div className="btn-group mx-auto mr-2 outer" role="group" aria-label="Basic example">
-                            {this.state.colorbuttons.map(button => (<ColorButton key={button.c_id} id={button.class_id} type="button" 
-                            selectColor={this.buttonColor} name={button.color} className={'btn btn-'.concat(button.class_id)}>{button.color}</ColorButton>))}
-                        </div>
-                    </div>
+                <div className="container col-3 mx-auto"> 
+                    <button className="btn btn-block btn-success" onClick={this.init_database}>Previous Buttons</button>
                 </div>
+
+                <ColorButton colorbuttons={this.state.colorbuttons} selectColor={this.buttonColor}/>
 
                 <div className="input-group input-group-lg col-8 mx-auto">
                     <input type="text" className="form-control" id="create-button" placeholder="Button name"></input>
@@ -48,22 +48,16 @@ class CreateButton extends Component {
          return (
             <React.Fragment>
 
-                <div className="container">
-                    {this.state.buttons.map(button => (<PushButton key={button.id} id={button.id} value={button.value} 
-                    name={button.name} color={this.state.currentColor} onDelete={this.handleDelete}></PushButton>))}
+                <div className="container col-3 mx-auto"> 
+                    <button className="btn btn-block btn-success" onClick={this.init_database}>Refresh</button>
                 </div>
 
                 <div className="container">
-                    <div className="row">
-                        <span className="text mx-auto">Select Color:</span>
-                    </div>
-                    <div className="row row-m-t">
-                            <div className="btn-group mx-auto mr-2 outer" role="group" aria-label="Basic example">
-                                {this.state.colorbuttons.map(button => (<ColorButton key={button.c_id} id={button.class_id} type="button" 
-                                selectColor={this.buttonColor} name={button.color} className={'btn btn-'.concat(button.class_id)}>{button.color}</ColorButton>))}
-                        </div>
-                    </div>
+                    {this.state.buttons.map(button => (<PushButton key={button.button_id} id={button.button_id} value={button.value} 
+                    name={button.name} onIncrement={this.handleIncrement} onDecrement={this.handleDecrement} color={button.color} onDelete={this.handleDelete}></PushButton>))}
                 </div>
+
+                <ColorButton colorbuttons={this.state.colorbuttons} selectColor={this.buttonColor}/>
                     
                 <div className="input-group input-group-lg col-8 mx-auto">
                     <input type="text" className="form-control" id="create-button" placeholder="Enter button name"></input>
@@ -77,49 +71,151 @@ class CreateButton extends Component {
     }
 
     readInput = (event) => {
-        
+        //Read Value of Button Name Text Input
         var name = document.getElementById("create-button").value;
+        document.getElementById("create-button").value = "";
         
         if(name.length === 0){
             window.alert("Please give your button a name.");
             return;
         }
 
+        this.init_database();
         let {buttons, counter} = this.state;
 
-        var button = {id: 1, value: 0, name: name};
+        //Creating properties for the new button
+        var button = {
+            button_id: 1,
+            value: 0,
+            name: name, 
+            color: this.state.currentColor
+        };
 
         counter = counter + 1;
-        button.id = counter;
-        button.value = 0;
+        button.button_id = counter;
+        button.color = this.state.currentColor;
         button.name = name;
+        button.value = 0;
         buttons.push(button)
-        
-        
         this.setState( {buttons: buttons});
         this.setState({counter: counter});
-        //console.log(this.state);
         
+        //Add new button to database
+        db.collection("buttons").doc('button'+button.button_id).set(button).then(function() {
+            console.log("Document successfully written!");
+        })
+        .catch(function(error) {
+            console.error("Error writing document: ", error);
+        });
+ 
+    }
+
+    handleIncrement = (button_id) => {
+        console.log("Increment Clicked for button",button_id);
+
+        //Increment DATABSE value of Button# by 1
+        db.collection("buttons").doc("button"+button_id).update({
+            value: increment
+
+        }).then(function() {
+            console.log("Document successfully written!");
+        })
+        .catch(function(error) {
+            console.error("Error writing document: ", error);
+        });
+
+        //Increment LOCAL value of button by 1
+        var buttons = this.state.buttons;
+        for(var i=0; i < buttons.length; i++){
+            if(buttons[i].button_id === button_id){
+                buttons[i].value++;
+            }
+        }
+        this.setState({buttons: buttons});
+
+    }
+
+    handleDecrement = (button_id) => {
+        console.log("Decrement Clicked for button",button_id);
+
+        //Decrement Local Value of button by 1
+        var buttons = this.state.buttons;
+        for(var i=0; i < buttons.length; i++){
+            if(buttons[i].button_id === button_id){
+                if(buttons[i].value > 0){
+                    buttons[i].value--;
+                }
+                else{
+                    return;
+                }
+            }
+        }
+        this.setState({buttons: buttons});
+
+        //Decrement DATABSE value of Button# by 1
+        db.collection("buttons").doc("button"+button_id).update({
+            value: decrement
+
+        }).then(function() {
+            console.log("Document successfully written!");
+        })
+        .catch(function(error) {
+            console.error("Error writing document: ", error);
+        });
     }
 
     handleDelete = (button_id) => {
-        var confirmDelete = window.confirm("Are you sure you want to delete this button?");
+        console.log("Delete Clicked for button",button_id);
+        var confirmDelete = window.confirm("Are you sure you want to delete this button? All saved data will be lost.");
+        
+        //Remove button from local array using filter
         if(confirmDelete === true){
             let buttons = this.state.buttons.filter(button => button.id !== button_id);
             this.setState({buttons: buttons});
         }
+
+        //Delete removed button from online Database
+        db.collection("buttons").doc("button".concat(button_id)).delete().then(function() {
+            console.log("Document successfully deleted!");
+        }).catch(function(error) {
+            console.error("Error removing document: ", error);
+        });
+
+        this.init_database();
         
     
     }
 
     buttonColor = (button_color) => {
-        
         this.setState({currentColor: button_color});
-
     }
+
+    init_database = () => {
+        console.log("Updating local state from Database:");
+      
+        db.collection("buttons")
+        .get()
+        .then(querySnapshot => {
+            const data = querySnapshot.docs.map(doc => doc.data());
+            this.setState({buttons: data});
+            this.setState({counter: data[data.length-1].button_id});
+            
+        });
+      
+      }
+
+      //Real-Time db listener
+      db_listener = () => {
+          db.collection("buttons").onSnapshot(snapshot => {
+              //let changes = snapshot.docChanges();  //Can show when changes are made.
+                                                    //Certain fields will be changed to
+                                                    // "Added" or "Modified" to indicate
+                                                    //Type of change
+            });
+      }
+
+    
 
 }
  
 export default CreateButton;
-
-//<PushButton id={this.state.id} value={this.state.value} name={this.state.name}></PushButton>
