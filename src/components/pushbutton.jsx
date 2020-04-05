@@ -22,7 +22,7 @@ class PushButton extends Component {
                 {this.props.name}
                 </button>
                 
-                    <button className="btn btn-lg btn-danger col-1" onClick={() => this.props.onDelete(this.props.id)}>X</button>
+                    <button className="btn btn-lg btn-danger" onClick={() => this.props.onDelete(this.props.id)}>X</button>
             
             </div>
             

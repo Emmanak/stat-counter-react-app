@@ -4,11 +4,14 @@ import ColorButton from './colorbutton';
 import {db} from '../fbConfig.js';
 import {increment, decrement} from '../fbConfig.js';
 
+var data_init = false;
+
 
 class CreateButton extends Component {
     
     state = { buttons: [],
         counter: 0,
+        email: this.props.email,
         colorbuttons: [
             {c_id : "c1",  class_id : "primary", color : "Blue"},
             {c_id : "c2",  class_id : "secondary", color : "Grey"},
@@ -24,13 +27,13 @@ class CreateButton extends Component {
 
         
         let {buttons} = this.state;
-        console.log(buttons);
         if(buttons === undefined || buttons.length === 0){
+            if(data_init === false){
+                data_init = true;
+                this.init_database();
+            }
             return ( 
             <div>
-                <div className="container col-3 mx-auto"> 
-                    <button className="btn btn-block btn-success" onClick={this.init_database}>Previous Buttons</button>
-                </div>
 
                 <ColorButton colorbuttons={this.state.colorbuttons} selectColor={this.buttonColor}/>
 
@@ -45,10 +48,11 @@ class CreateButton extends Component {
          );
 
         }
+        else {
          return (
             <React.Fragment>
 
-                <div className="container col-3 mx-auto"> 
+                <div className="container mx-auto"> 
                     <button className="btn btn-block btn-success" onClick={this.init_database}>Refresh</button>
                 </div>
 
@@ -68,6 +72,7 @@ class CreateButton extends Component {
             </React.Fragment>
 
          );
+        }
     }
 
     readInput = (event) => {
@@ -101,7 +106,9 @@ class CreateButton extends Component {
         this.setState({counter: counter});
         
         //Add new button to database
-        db.collection("buttons").doc('button'+button.button_id).set(button).then(function() {
+        db.collection("stat-tracker").doc(this.state.email)
+        .collection("buttons").doc('button'+button.button_id)
+        .set(button).then(function() {
             console.log("Document successfully written!");
         })
         .catch(function(error) {
@@ -114,7 +121,8 @@ class CreateButton extends Component {
         console.log("Increment Clicked for button",button_id);
 
         //Increment DATABSE value of Button# by 1
-        db.collection("buttons").doc("button"+button_id).update({
+        db.collection("stat-tracker").doc(this.state.email)
+        .collection("buttons").doc("button"+button_id).update({
             value: increment
 
         }).then(function() {
@@ -153,7 +161,8 @@ class CreateButton extends Component {
         this.setState({buttons: buttons});
 
         //Decrement DATABSE value of Button# by 1
-        db.collection("buttons").doc("button"+button_id).update({
+        db.collection("stat-tracker").doc(this.state.email)
+        .collection("buttons").doc("button"+button_id).update({
             value: decrement
 
         }).then(function() {
@@ -167,21 +176,25 @@ class CreateButton extends Component {
     handleDelete = (button_id) => {
         console.log("Delete Clicked for button",button_id);
         var confirmDelete = window.confirm("Are you sure you want to delete this button? All saved data will be lost.");
+        console.log(confirmDelete);
         
-        //Remove button from local array using filter
         if(confirmDelete === true){
+            //Remove button from local array using filter
             let buttons = this.state.buttons.filter(button => button.id !== button_id);
             this.setState({buttons: buttons});
+
+            //Delete removed button from online Database
+            db.collection("stat-tracker").doc(this.state.email)
+            .collection("buttons").doc("button".concat(button_id)).delete().then(function() {
+                console.log("Document successfully deleted!");
+            }).catch(function(error) {
+                console.error("Error removing document: ", error);
+            });
+
+            this.init_database();
         }
 
-        //Delete removed button from online Database
-        db.collection("buttons").doc("button".concat(button_id)).delete().then(function() {
-            console.log("Document successfully deleted!");
-        }).catch(function(error) {
-            console.error("Error removing document: ", error);
-        });
-
-        this.init_database();
+        
         
     
     }
@@ -192,13 +205,20 @@ class CreateButton extends Component {
 
     init_database = () => {
         console.log("Updating local state from Database:");
-      
-        db.collection("buttons")
+        db.collection("stat-tracker").doc(this.state.email).collection("buttons")
         .get()
         .then(querySnapshot => {
             const data = querySnapshot.docs.map(doc => doc.data());
+            if(data === undefined || data[data.length-1] === undefined){
+                window.alert("No button data is available. Please create a new button.");
+                this.setState({buttons: data});
+                //this.setState({data_init: true});
+                data_init = true
+                return;
+            }
             this.setState({buttons: data});
             this.setState({counter: data[data.length-1].button_id});
+            data_init = true;
             
         });
       
@@ -217,5 +237,9 @@ class CreateButton extends Component {
     
 
 }
+
+/*<div className="container mx-auto"> 
+                    <button className="btn btn-block btn-success" onClick={this.init_database}>Load</button>
+                </div>*/
  
 export default CreateButton;
