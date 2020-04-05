@@ -18,13 +18,16 @@ class SignInScreen extends React.Component {
         if(this.state.loginStatus === true){
             return(
                 <React.Fragment>
-                    <div className="d-flex justify-content-between">
+                    
+                    <div className="container">
+                    <div className="d-flex justify-content-center">
                     <span className="badge badge-info badge-block">Info</span>
                     <div className="card">
                         
-                        <div className="card-body justify">
+                        <div className="card-body">
                             To manually sync this device, click the "Refresh" button!
                         </div>
+                    </div>
                     </div>
                     </div>
                     <br></br>
