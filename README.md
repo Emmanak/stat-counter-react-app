@@ -1,3 +1,30 @@
+# [Collaborative Stat Tracker (link)](https://stat-counter-react-app.web.app/)
+
+This app was created to allow groups of people to gather stats collectively. 
+It features customizable push-buttons that can be given their own name and color.
+Everytime a button is pressed, it will increment the total value of that button by 1.
+This change is synced across all devices. `DISCLAIMER`: Internet connection is required.
+Buttons can also be deleted by any device. This feature will need to be used sparingly
+when working in groups. It is advisable that the group is notified before a button is deleted.
+
+## Using the app:
+To access the app, First create and account using a valid email address. If the account is to
+be shared with others, make your password accordingly. Passwords can be changed at anytime using
+the ["Forgot Password?"]. 
+Secondly, create buttons with names and colours of your preference. 
+Finally, log into one or more devices to share button access. 
+
+## Troubleshooting
+Most problems can be fixed by simply pressing the "Refresh" button.
+Occasionally, an error message or alert will notify you of any user input issues.
+
+## Technical Information:
+This app was created ReactJS using `create-react-app`.
+The app is hosted on `Firebase`. All the authentication and database rules are handled by `Firestore`. 
+
+
+## For information about using `create-react-app` read the notes below:
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

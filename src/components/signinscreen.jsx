@@ -23,7 +23,7 @@ class SignInScreen extends React.Component {
                     <div className="card">
                         
                         <div className="card-body justify">
-                            To manually sync devices, click the "Refresh" button!
+                            To manually sync this device, click the "Refresh" button!
                         </div>
                     </div>
                     </div>
@@ -72,9 +72,11 @@ class SignInScreen extends React.Component {
                         <div className="card-body justify">
                             This web app allows you to create <i>customizable </i> 
                              push-buttons that can sync across multiple devices. 
-                            First, create an <b>account</b>. Second, create some <b>buttons</b>! 
-                            Finally, log into one of <b>more</b> devices and push away! 
-                            Any change on each individual devices will be <b>synced</b> across all devices!
+                            First, create an <b>account</b>. If the account will be <i>shared</i>, set 
+                            your password accordingly!
+                             Second, create some <b>buttons</b>. 
+                            Finally, log into one or <b>more</b> devices and push away! 
+                            Any change on each individual devices will be <b>synced</b> across all devices.
                         </div>
                     </div>
                     </div>
