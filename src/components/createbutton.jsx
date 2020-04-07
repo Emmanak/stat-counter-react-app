@@ -10,7 +10,8 @@ var data_init = false;
 class CreateButton extends Component {
     
     state = { buttons: [],
-        counter: 0,
+        time: 0,
+        counter: 10,
         email: this.props.email,
         colorbuttons: [
             {c_id : "c1",  class_id : "primary", color : "Blue"},
@@ -42,6 +43,12 @@ class CreateButton extends Component {
                     <div className="input-group-append"><button onClick={this.readInput} className="btn btn-primary btn-lg">OK</button>
                     </div>
                 </div>
+                <button
+               id="refreshButton"
+                 className="btn btn-block btn-success invisible"
+               >
+                 Refresh
+               </button>
                     
             </div>
             
@@ -50,33 +57,85 @@ class CreateButton extends Component {
         }
         else {
          return (
-            <React.Fragment>
+           <React.Fragment>
+             <div className="container">
+                 <div className="container mx-auto p-20 col-10">
+                 <button
+               id="refreshButton"
+                 className="btn btn-success btn-block"
+                 onClick={this.init_database}
+               >
+                 Refresh
+               </button>
+                     
+                 </div>
+               
+             </div>
 
-                <div className="container mx-auto"> 
-                    <button className="btn btn-block btn-success" onClick={this.init_database}>Refresh</button>
-                </div>
+             <div className="container"> 
+               {this.state.buttons.map((button) => (
+                 <PushButton
+                   key={button.button_id}
+                   id={button.button_id}
+                   value={button.value}
+                   name={button.name}
+                   onIncrement={this.handleIncrement}
+                   onDecrement={this.handleDecrement}
+                   color={button.color}
+                   onDelete={this.handleDelete}
+                 ></PushButton>
+               ))}
+             </div>
 
-                <div className="container">
-                    {this.state.buttons.map(button => (<PushButton key={button.button_id} id={button.button_id} value={button.value} 
-                    name={button.name} onIncrement={this.handleIncrement} onDecrement={this.handleDecrement} color={button.color} onDelete={this.handleDelete}></PushButton>))}
-                </div>
+             <ColorButton
+               colorbuttons={this.state.colorbuttons}
+               selectColor={this.buttonColor}
+             />
 
-                <ColorButton colorbuttons={this.state.colorbuttons} selectColor={this.buttonColor}/>
-                    
-                <div className="input-group input-group-lg col-8 mx-auto">
-                    <input type="text" className="form-control" id="create-button" placeholder="Enter button name"></input>
-                    <div className="input-group-append"><button onClick={this.readInput} className="btn btn-primary btn-lg">OK</button>
-                    </div>
-                </div>
-                    
-            </React.Fragment>
+             <div className="container p-4">
+             <div className="input-group input-group-lg mx-auto">
+               <input
+                 type="text"
+                 className="form-control"
+                 id="create-button"
+                 placeholder="Enter button name"
+               ></input>
+               <div className="input-group-append">
+                 <button
+                   onClick={this.readInput}
+                   className="btn btn-primary btn-lg"
+                 >
+                   OK
+                 </button>
+               </div>
+             </div>
 
+             </div>
+             
+             <br></br>
+             <div className="container p-4 mx-auto">
+             <div className="card">
+               <div className="card-body">
+                <h5 className="card-subtitle mb-2 text-muted"><span className="badge badge-info badge-large mr-2">Button Set ID</span></h5><h6>Share this ID with your fellow collaborators:</h6>
+                 
+                 <p id="copyToClipboard" value={this.state.email} className="card-text bg-light">{this.state.email}
+                 </p>
+                 <button className="btn btn-secondary" onClick={this.copyToClipboard}>
+                   Copy to Clipboard
+                 </button>
+               </div>
+             </div>
+
+             </div>
+           </React.Fragment>
          );
+         
         }
     }
 
     readInput = (event) => {
         //Read Value of Button Name Text Input
+        document.getElementById("refreshButton").click();
         var name = document.getElementById("create-button").value;
         document.getElementById("create-button").value = "";
         
@@ -84,9 +143,8 @@ class CreateButton extends Component {
             window.alert("Please give your button a name.");
             return;
         }
-
-        this.init_database();
-        let {buttons, counter} = this.state;
+        else{
+            let {counter} = this.state;
 
         //Creating properties for the new button
         var button = {
@@ -96,24 +154,27 @@ class CreateButton extends Component {
             color: this.state.currentColor
         };
 
+        
         counter = counter + 1;
         button.button_id = counter;
         button.color = this.state.currentColor;
         button.name = name;
         button.value = 0;
-        buttons.push(button)
-        this.setState( {buttons: buttons});
-        this.setState({counter: counter});
+        
         
         //Add new button to database
-        db.collection("stat-tracker").doc(this.state.email)
+        db.collection("stat-tracker").doc(this.props.email)
         .collection("buttons").doc('button'+button.button_id)
         .set(button).then(function() {
             console.log("Document successfully written!");
+            
         })
         .catch(function(error) {
             console.error("Error writing document: ", error);
+            document.getElementById("refreshButton").click()
         });
+
+        }
  
     }
 
@@ -121,7 +182,7 @@ class CreateButton extends Component {
         console.log("Increment Clicked for button",button_id);
 
         //Increment DATABSE value of Button# by 1
-        db.collection("stat-tracker").doc(this.state.email)
+        db.collection("stat-tracker").doc(this.props.email)
         .collection("buttons").doc("button"+button_id).update({
             value: increment
 
@@ -161,7 +222,7 @@ class CreateButton extends Component {
         this.setState({buttons: buttons});
 
         //Decrement DATABSE value of Button# by 1
-        db.collection("stat-tracker").doc(this.state.email)
+        db.collection("stat-tracker").doc(this.props.email)
         .collection("buttons").doc("button"+button_id).update({
             value: decrement
 
@@ -179,20 +240,23 @@ class CreateButton extends Component {
         console.log(confirmDelete);
         
         if(confirmDelete === true){
-            //Remove button from local array using filter
-            let buttons = this.state.buttons.filter(button => button.id !== button_id);
-            this.setState({buttons: buttons});
+
 
             //Delete removed button from online Database
-            db.collection("stat-tracker").doc(this.state.email)
+            db.collection("stat-tracker").doc(this.props.email)
             .collection("buttons").doc("button".concat(button_id)).delete().then(function() {
                 console.log("Document successfully deleted!");
+                window.alert("Button has been deleted");
+                setTimeout(document.getElementById("refreshButton").click(), 1000);
+            
             }).catch(function(error) {
                 console.error("Error removing document: ", error);
+                
             });
-
-            this.init_database();
+            console.log(this.state.buttons);
         }
+
+        
 
         
         
@@ -205,41 +269,59 @@ class CreateButton extends Component {
 
     init_database = () => {
         console.log("Updating local state from Database:");
-        db.collection("stat-tracker").doc(this.state.email).collection("buttons")
+        db.collection("stat-tracker").doc(this.props.email).collection("buttons")
         .get()
         .then(querySnapshot => {
             const data = querySnapshot.docs.map(doc => doc.data());
             if(data === undefined || data[data.length-1] === undefined){
                 window.alert("No button data is available. Please create a new button.");
                 this.setState({buttons: data});
-                //this.setState({data_init: true});
                 data_init = true
                 return;
             }
-            this.setState({buttons: data});
-            this.setState({counter: data[data.length-1].button_id});
-            data_init = true;
+                this.setState({buttons: data});
+                console.log(data);
+                console.log(this.state.buttons);
+                this.setState({counter: data[data.length-1].button_id});
+                data_init = true;
+                console.log("stupid");
             
         });
       
       }
 
-      //Real-Time db listener
-      db_listener = () => {
-          db.collection("buttons").onSnapshot(snapshot => {
-              //let changes = snapshot.docChanges();  //Can show when changes are made.
-                                                    //Certain fields will be changed to
-                                                    // "Added" or "Modified" to indicate
-                                                    //Type of change
-            });
+      copyToClipboard = () => {
+          var text = this.state.email;
+        /* Select the text field */
+        var textarea = document.createElement("textarea");
+        textarea.textContent = text;
+        textarea.style.position = "fixed";
+        document.body.appendChild(textarea);
+        textarea.select();
+        alert("Copied the text: " + text);
+        try {
+          return document.execCommand("cut");
+        } catch (ex) {
+          console.warn("Copy to clipboard failed.", ex);
+          return false;
+        } finally {
+          document.body.removeChild(textarea);
+        }
+
+        /* Alert the copied text */
+        
+      }
+
+      componentDidMount() {
+        this.interval = setInterval(() => document.getElementById("refreshButton").click(), 15000);
+      }
+      componentWillUnmount() {
+        clearInterval(this.interval);
       }
 
     
 
 }
 
-/*<div className="container mx-auto"> 
-                    <button className="btn btn-block btn-success" onClick={this.init_database}>Load</button>
-                </div>*/
- 
+
 export default CreateButton;

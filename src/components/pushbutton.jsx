@@ -14,12 +14,11 @@ class PushButton extends Component {
             <div className="row row-m-t disable-dbl-tap-zoom outer">
                
                 
-                    <button className="btn btn-lg btn-secondary col-1 mr-2" onClick={() => this.props.onDecrement(this.props.id)}><b>-</b></button>
-                    <span className="mr-2"><b>{this.props.value}</b></span>
+                    <button className="btn btn-lg btn-secondary col-1 mr-3" onClick={() => this.props.onDecrement(this.props.id)}><b>-</b></button>
                     
                     
                     <button name={this.props.name} id={this.props.id} className={this.buttonStyle()} color="pink" onClick={() => this.props.onIncrement(this.props.id)}>
-                {this.props.name}
+                {this.props.name+":  "+this.props.value}
                 </button>
                 
                     <button className="btn btn-lg btn-danger" onClick={() => this.props.onDelete(this.props.id)}>X</button>
@@ -34,7 +33,7 @@ class PushButton extends Component {
     buttonStyle() {
         //let { id } = this.state;
         
-        return 'btn btn-lg col-7 mr-5 btn-'.concat(this.state.button_color);
+        return 'btn btn-lg col-7 mr-3 btn-'.concat(this.state.button_color);
         
     }
 

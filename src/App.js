@@ -5,10 +5,6 @@ import SigninScreen from './components/signinscreen';
 
 
 function App() {
-
-  var buttons;
-  var counter;
-  var login = false;
   
   
  
