@@ -75,13 +75,13 @@ class SignInScreen extends React.Component {
                   <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()}/>
                   <br></br>
                   <div className="input-group input-group-lg col-10 mx-auto">
-                      <input id="txtEmail" type="email" placeholder="Email" className="form-control"></input>
+                      <input id="txtSignupEmail" type="email" placeholder="Email" className="form-control"></input>
                   </div>
                   
                   <br></br>
         
                   <div className="input-group input-group-lg col-10 mx-auto">
-                      <input id="txtPassword" type="password" placeholder="Password" className="form-control"></input>
+                      <input id="txtSignupPassword" type="password" placeholder="Password" className="form-control"></input>
                   </div>
                   
                   <br></br>
@@ -230,8 +230,8 @@ class SignInScreen extends React.Component {
     }
 
     signUp = () => {
-        const email = document.getElementById("txtEmail").value;
-        const pass = document.getElementById("txtPassword").value;
+        const email = document.getElementById("txtSignupEmail").value;
+        const pass = document.getElementById("txtSignupPassword").value;
 
         //Sign Up
         const promise = firebase.auth().createUserWithEmailAndPassword(email, pass);
