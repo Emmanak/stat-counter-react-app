@@ -1,6 +1,10 @@
-{
-  "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null"
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/{documents=**} {
+  		
+      allow read;
+      allow write;
+  		
+		
   }
 }

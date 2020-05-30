@@ -7,6 +7,7 @@ import CreateButton from './createbutton';
 class SignInScreen extends React.Component {
     state = {
         loginStatus: false,
+        anon_login: false,
         forgotPassword: false,
         signUpStatus: false,
         logoutButton : "btn btn-primary mr-2 invisible",
@@ -32,7 +33,7 @@ class SignInScreen extends React.Component {
                     </div>
                     </div>
                     <br></br>
-                    <CreateButton email={this.state.email}></CreateButton>
+                    <CreateButton email={this.state.email} anon_login={this.state.anon_login}></CreateButton>
                     <br></br>
                     <div className="d-flex center-content-between">
                       <button id="btnLogout" className={this.state.logoutButton} onClick={this.signOut}>Logout</button>
@@ -75,13 +76,13 @@ class SignInScreen extends React.Component {
                   <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()}/>
                   <br></br>
                   <div className="input-group input-group-lg col-10 mx-auto">
-                      <input id="txtEmail" type="email" placeholder="Email" className="form-control"></input>
+                      <input id="txtSignUpEmail" type="email" placeholder="Email" className="form-control"></input>
                   </div>
                   
                   <br></br>
         
                   <div className="input-group input-group-lg col-10 mx-auto">
-                      <input id="txtPassword" type="password" placeholder="Password" className="form-control"></input>
+                      <input id="txtSignUpPassword" type="password" placeholder="Password" className="form-control"></input>
                   </div>
                   
                   <br></br>
@@ -180,26 +181,29 @@ class SignInScreen extends React.Component {
     login = () => {
         const email = document.getElementById("txtEmail").value;
         const pass = document.getElementById("txtPassword").value;
+        console.log("login clicked");
+
+        firebase.auth().signOut();
 
         //Sign in
-        const promise = firebase.auth().signInWithEmailAndPassword(email, pass);
-
-        firebase.auth().onAuthStateChanged(firebaseUser => {
-            if(firebaseUser){
-                this.setState({email: firebaseUser.uid});
-                this.setState({logoutButton: "btn btn-primary col-3 mx-auto"});
-                this.setState({loginButton: "btn btn-primary mr-2 invisible"});
-                this.setState({signUpButton: "btn btn-secondary mr-10 invisible"});
-                this.setState({loginStatus : true});
-            }
-            else{
-                console.log('STATUS: Not logged in');
-                //window.alert("Please ensure that you registered with a valid email and password. If not, try to sign up or login again.");
-                promise.catch(e => window.alert(e.message));
-                //window.location.reload();
-                //return false;
-            }
-        });
+        const promise = firebase.auth().signInWithEmailAndPassword(email, pass).then(
+            
+            setTimeout(firebase.auth().onAuthStateChanged(firebaseUser => {
+                if(firebaseUser){
+                    console.log("Logged in");
+                    setTimeout(this.setState({email: firebaseUser.uid}),2000);
+                    this.setState({logoutButton: "btn btn-primary col-3 mx-auto"});
+                    this.setState({loginButton: "btn btn-primary mr-2 invisible"});
+                    this.setState({signUpButton: "btn btn-secondary mr-10 invisible"});
+                    this.setState({loginStatus : true});
+                    
+                }
+                else{
+                    console.log('STATUS: Not logged in');
+                    promise.catch(e => window.alert(e.message));
+                }
+            }),2000)
+        );
     }
 
     login_anon = () => {
@@ -213,12 +217,11 @@ class SignInScreen extends React.Component {
                 this.setState({email: button_set_id});
                 this.setState({logoutButton: "btn btn-primary col-3 mx-auto"});
                 this.setState({loginStatus : true})
+                this.setState({anon_login: true});
             }
             else{
                 console.log('STATUS: Not logged in');
                 promise.catch(e => window.alert(e.message));
-                //window.location.reload();
-                //return false;
 
             }
         });
@@ -230,18 +233,22 @@ class SignInScreen extends React.Component {
     }
 
     signUp = () => {
-        const email = document.getElementById("txtEmail").value;
-        const pass = document.getElementById("txtPassword").value;
+        const email = document.getElementById("txtSignUpEmail").value;
+        const pass = document.getElementById("txtSignUpPassword").value;
 
         //Sign Up
-        const promise = firebase.auth().createUserWithEmailAndPassword(email, pass);
-        promise.catch(e => console.log(e.message));
+        const promise = firebase.auth().createUserWithEmailAndPassword(email, pass).catch(function(error){
+            var errCode = error.code;
+            var errMessage = error.message;
+            console.log(errCode);
+            if(errCode === "auth/email-already-in-use"){
+                window.alert("You've already signed up! Please go back and login.");
+            }else{
+                window.alert(errMessage);
+            }
+        });
 
-        window.alert("You've signed up!");
         this.setState({signUpStatus: true});
-
-        window.location.reload();
-        return false;
 
         
     }

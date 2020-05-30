@@ -2,6 +2,8 @@ import React from 'react';
 import './App.css';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import SigninScreen from './components/signinscreen';
+import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
+import DemoPage from './components/demo';
 
 
 function App() {
@@ -10,9 +12,13 @@ function App() {
  
     return (
       <React.Fragment>
-        <SigninScreen></SigninScreen>
-  
-        <br></br>
+        <Router>
+          <Switch>
+            <Route path="/" exact component={SigninScreen}/>
+            <Route path="/demopage" exact component={DemoPage}/>
+          </Switch>
+
+        </Router>
         <script src="/__/firebase/7.13.1/firebase-app.js"></script>
         <script src="/__/firebase/7.13.1/firebase-analytics.js"></script>
         <script src="/__/firebase/init.js"></script>

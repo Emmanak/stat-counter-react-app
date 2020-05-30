@@ -13,6 +13,7 @@ class CreateButton extends Component {
         time: 0,
         counter: 10,
         email: this.props.email,
+        anon_login: this.props.anon_login,
         colorbuttons: [
             {c_id : "c1",  class_id : "primary", color : "Blue"},
             {c_id : "c2",  class_id : "secondary", color : "Grey"},
@@ -34,23 +35,56 @@ class CreateButton extends Component {
                 this.init_database();
             }
             return ( 
-            <div>
-
-                <ColorButton colorbuttons={this.state.colorbuttons} selectColor={this.buttonColor}/>
-
-                <div className="input-group input-group-lg col-8 mx-auto">
-                    <input type="text" className="form-control" id="create-button" placeholder="Button name"></input>
-                    <div className="input-group-append"><button onClick={this.readInput} className="btn btn-primary btn-lg">OK</button>
-                    </div>
-                </div>
-                <button
-               id="refreshButton"
+            <React.Fragment>
+              <button
+               id="refreshButton" onClick={this.init_database}
                  className="btn btn-block btn-success invisible"
                >
                  Refresh
                </button>
+               <div className="container p-4">
+              <div className="card">
+                <div className="card-body">
+                  <div>
+                    <span className="badge badge-info badge-large"><h6>Create Button:</h6></span>
                     
+                  </div>
+                  <br></br>
+                    <div className="d-flex justify-content-center">
+                      <ColorButton
+                        colorbuttons={this.state.colorbuttons}
+                        selectColor={this.buttonColor}
+                        currentColor={this.state.currentColor}/>
+                    </div>
+                    <br></br>
+
+                    <div className="input-group input-group-lg mx-auto">
+
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="create-button"
+                        placeholder="Enter button name"
+                      ></input>
+
+                      <div className="input-group-append">
+                        <button
+                          onClick={this.readInput}
+                          className="btn btn-primary btn-lg">OK
+                        </button>
+
+                      </div>
+
+                    </div>
+                  </div>
+                
+              </div>
             </div>
+
+                
+                
+                    
+            </React.Fragment>
             
          );
 
@@ -60,16 +94,15 @@ class CreateButton extends Component {
            <React.Fragment>
              <div className="container">
                  <div className="container mx-auto p-20 col-10">
+
                  <button
-               id="refreshButton"
-                 className="btn btn-success btn-block"
-                 onClick={this.init_database}
-               >
-                 Refresh
+                      id="refreshButton"
+                    className="btn btn-success btn-block"
+                    onClick={this.init_database}>
+                    Refresh
                </button>
                      
                  </div>
-               
              </div>
 
              <div className="container"> 
@@ -87,30 +120,46 @@ class CreateButton extends Component {
                ))}
              </div>
 
-             <ColorButton
-               colorbuttons={this.state.colorbuttons}
-               selectColor={this.buttonColor}
-             />
+             
 
-             <div className="container p-4">
-             <div className="input-group input-group-lg mx-auto">
-               <input
-                 type="text"
-                 className="form-control"
-                 id="create-button"
-                 placeholder="Enter button name"
-               ></input>
-               <div className="input-group-append">
-                 <button
-                   onClick={this.readInput}
-                   className="btn btn-primary btn-lg"
-                 >
-                   OK
-                 </button>
-               </div>
-             </div>
+            <div className="container p-4">
+              <div className="card">
+                <div className="card-body">
+                  <div>
+                    <span className="badge badge-info badge-large"><h6>Create Button:</h6></span>
+                    
+                  </div>
+                  <br></br>
+                    <div className="d-flex justify-content-center">
+                      <ColorButton
+                        colorbuttons={this.state.colorbuttons}
+                        selectColor={this.buttonColor}
+                        currentColor={this.state.currentColor}/>
+                    </div>
+                    <br></br>
 
-             </div>
+                    <div className="input-group input-group-lg mx-auto">
+
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="create-button"
+                        placeholder="Enter button name"
+                      ></input>
+
+                      <div className="input-group-append">
+                        <button
+                          onClick={this.readInput}
+                          className="btn btn-primary btn-lg">OK
+                        </button>
+
+                      </div>
+
+                    </div>
+                  </div>
+                
+              </div>
+            </div>
              
              <br></br>
              <div className="container p-4 mx-auto">
@@ -135,7 +184,14 @@ class CreateButton extends Component {
 
     readInput = (event) => {
         //Read Value of Button Name Text Input
-        document.getElementById("refreshButton").click();
+        console.log(this.props.anon_login);
+        if(this.props.anon_login === true){
+          document.getElementById("create-button").value = "";
+          window.alert("You are not authorized to create buttons. Please contact the button owner.");
+          return;
+        }
+        else{
+          document.getElementById("refreshButton").click();
         var name = document.getElementById("create-button").value;
         document.getElementById("create-button").value = "";
         
@@ -160,6 +216,8 @@ class CreateButton extends Component {
         button.color = this.state.currentColor;
         button.name = name;
         button.value = 0;
+
+        
         
         
         //Add new button to database
@@ -167,6 +225,7 @@ class CreateButton extends Component {
         .collection("buttons").doc('button'+button.button_id)
         .set(button).then(function() {
             console.log("Document successfully written!");
+            document.getElementById("refreshButton").click()
             
         })
         .catch(function(error) {
@@ -175,6 +234,9 @@ class CreateButton extends Component {
         });
 
         }
+
+        }
+        
  
     }
 
@@ -236,25 +298,35 @@ class CreateButton extends Component {
 
     handleDelete = (button_id) => {
         console.log("Delete Clicked for button",button_id);
-        var confirmDelete = window.confirm("Are you sure you want to delete this button? All saved data will be lost.");
-        console.log(confirmDelete);
-        
-        if(confirmDelete === true){
-
-
-            //Delete removed button from online Database
-            db.collection("stat-tracker").doc(this.props.email)
-            .collection("buttons").doc("button".concat(button_id)).delete().then(function() {
-                console.log("Document successfully deleted!");
-                window.alert("Button has been deleted");
-                setTimeout(document.getElementById("refreshButton").click(), 1000);
-            
-            }).catch(function(error) {
-                console.error("Error removing document: ", error);
-                
-            });
-            console.log(this.state.buttons);
+        if(this.props.anon_login === true){
+          document.getElementById("create-button").value = "";
+          window.alert("You are not authorized to delete buttons. Please contact the button owner.");
+          return;
         }
+        else{
+          var confirmDelete = window.confirm("Are you sure you want to delete this button? All saved data will be lost.");
+          console.log(confirmDelete);
+        
+          if(confirmDelete === true){
+
+
+              //Delete removed button from online Database
+              db.collection("stat-tracker").doc(this.props.email)
+              .collection("buttons").doc("button".concat(button_id)).delete().then(function() {
+                  console.log("Document successfully deleted!");
+                  window.alert("Button has been deleted");
+                  setTimeout(document.getElementById("refreshButton").click(), 1000);
+              
+              }).catch(function(error) {
+                  console.error("Error removing document: ", error);
+                  
+              });
+              console.log(this.state.buttons);
+          }
+
+        }
+        
+        
 
         
 
@@ -269,6 +341,9 @@ class CreateButton extends Component {
 
     init_database = () => {
         console.log("Updating local state from Database:");
+        while(this.props.email === ""){
+          console.log("waiting");
+        }
         db.collection("stat-tracker").doc(this.props.email).collection("buttons")
         .get()
         .then(querySnapshot => {
@@ -284,7 +359,6 @@ class CreateButton extends Component {
                 console.log(this.state.buttons);
                 this.setState({counter: data[data.length-1].button_id});
                 data_init = true;
-                console.log("stupid");
             
         });
       
