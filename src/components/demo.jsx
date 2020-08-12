@@ -41,7 +41,14 @@ class DemoPage extends Component {
             );
         }
         else{
-            return ( 
+            return (
+                <React.Fragment>
+                <div className="d-flex card">
+                        
+                        <div className="card-body mx-auto">
+                            <h1><span className="badge badge-info">Click OK!</span></h1>
+                        </div>
+                    </div> 
                 <div className="container card">
                           <div className="card-body">
                           <div className="input-group input-group-lg col-10 mx-auto">
@@ -51,6 +58,7 @@ class DemoPage extends Component {
     
                           </div>
                       </div>
+                </React.Fragment>
              );
             
         } 
